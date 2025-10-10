@@ -70,20 +70,22 @@ def side_bar(pages):
     return page
 
 
-
-
 # ------------------------------------------
 #            HOME
 # -----------------------------------------
 
+
 def page_home(run_names=None):
     run_names = run_names or []
-    
+
     # Main title
-    st.markdown("""
+    st.markdown(
+        """
         <h1 style='text-align:center; font-size: 2.5em; margin-bottom: 0.2em;'>🍔 FOOD101 DEMO</h1>
         <hr style='width: 60%; margin: auto; border: 1px solid #bbb; margin-bottom: 1.5em;'>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # General description
     st.markdown(
@@ -94,22 +96,22 @@ def page_home(run_names=None):
         Explore live predictions, metrics, and model comparison.
         </p>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     # Pages description
     pages_info = [
         {
             "name": "📷 Live Prediction",
-            "desc": "Upload your food images, choose a model, and see instant predictions with confidence scores."
+            "desc": "Upload your food images, choose a model, and see instant predictions with confidence scores.",
         },
         {
             "name": "📊 Metrics and Configuration",
-            "desc": "Explore model accuracy, loss curves, and hyperparameters used during training."
+            "desc": "Explore model accuracy, loss curves, and hyperparameters used during training.",
         },
         {
             "name": "📈 Compare All Models",
-            "desc": "Analyze performance across all trained models and compare test results side by side."
+            "desc": "Analyze performance across all trained models and compare test results side by side.",
         },
     ]
 
@@ -127,10 +129,12 @@ def page_home(run_names=None):
                     <p style='font-size: 0.95em; color: #444;'>{page_info['desc']}</p>
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
 
     st.markdown("<br><br>", unsafe_allow_html=True)
+
+
 # ------------------------------------------
 #             LIVE PREDICTIONS
 # -----------------------------------------

@@ -10,7 +10,7 @@ from src.st_sections import (
     side_bar,
     page_metrics_and_config,
     page_compare_models,
-    page_home
+    page_home,
 )
 
 # ----------------------------
@@ -42,7 +42,12 @@ run_map = {name: r for name, r in zip(run_names, runs)}
 # Initialize all models in "loaded_models"
 initialize_models(run_map)
 
-pages = ["🏠 Home", "📷 Live Prediction", "📊 Metrics and Configuration", "📈 Compare All Models"]
+pages = [
+    "🏠 Home",
+    "📷 Live Prediction",
+    "📊 Metrics and Configuration",
+    "📈 Compare All Models",
+]
 
 # ----------------------------
 # Sidebar navigation

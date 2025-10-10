@@ -32,10 +32,10 @@ def main(cfg: DictConfig):
         transform=get_model_transforms(
             model_name=cfg.model.name.lower(),
             version=cfg.model.version,
-            augmentation=cfg.train.augmentation
+            augmentation=cfg.train.augmentation,
         ),
         subset_percentage=cfg.train.subset_percentage,
-        seed=cfg.train.seed
+        seed=cfg.train.seed,
     )
 
     val_loader, _ = create_dataloader_from_folder(
@@ -44,19 +44,25 @@ def main(cfg: DictConfig):
         transform=get_model_transforms(
             model_name=cfg.model.name.lower(),
             version=cfg.model.version,
-            augmentation=None
+            augmentation=None,
         ),
         subset_percentage=1.0,
-        seed=cfg.train.seed
+        seed=cfg.train.seed,
     )
 
     num_classes = len(class_names)
 
     # ------------------ MODEL ------------------
     if cfg.model.name.lower() == "mobilenet":
-        model = MobileNetV2Model(num_classes=num_classes, pretrained=cfg.model.pretrained)
+        model = MobileNetV2Model(
+            num_classes=num_classes, pretrained=cfg.model.pretrained
+        )
     else:
-        model = EfficientNetModel(version=cfg.model.version, num_classes=num_classes, pretrained=cfg.model.pretrained)
+        model = EfficientNetModel(
+            version=cfg.model.version,
+            num_classes=num_classes,
+            pretrained=cfg.model.pretrained,
+        )
 
     model.freeze_backbone()
     if cfg.train.unfreeze_layers > 0:
@@ -79,6 +85,7 @@ def main(cfg: DictConfig):
     model_path = retrain_dir / "model_state_dict.pth"
     torch.save(model.model.state_dict(), model_path)
     print(f"[INFO] Retrained model saved at {model_path}")
+
 
 if __name__ == "__main__":
     main()

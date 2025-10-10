@@ -64,9 +64,13 @@ def main(cfg: DictConfig):
     # ---------------- MODEL ----------------
     if cfg.model.name.lower() == "mobilenet":
         if cfg.model.version.lower() == "v2":
-            model = MobileNetV2Model(num_classes=num_classes, pretrained=cfg.model.pretrained)
+            model = MobileNetV2Model(
+                num_classes=num_classes, pretrained=cfg.model.pretrained
+            )
         else:
-            raise ValueError(f"[ERROR] MobileNet with version {cfg.model.version} not supported")
+            raise ValueError(
+                f"[ERROR] MobileNet with version {cfg.model.version} not supported"
+            )
     elif cfg.model.name.lower() == "efficientnet":
         model = EfficientNetModel(
             version=cfg.model.version,
@@ -74,7 +78,9 @@ def main(cfg: DictConfig):
             pretrained=cfg.model.pretrained,
         )
     else:
-        raise ValueError(f"[ERROR] {cfg.model.name.lower()} with version {cfg.model.version} not supported")
+        raise ValueError(
+            f"[ERROR] {cfg.model.name.lower()} with version {cfg.model.version} not supported"
+        )
 
     model.freeze_backbone()
 

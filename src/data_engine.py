@@ -30,11 +30,7 @@ def is_zipfile_valid(zip_path):
         return False
 
 
-def create_data(
-    cfg: DictConfig,
-    keep_zip: bool = True,
-    seed: int = None
-):
+def create_data(cfg: DictConfig, keep_zip: bool = True, seed: int = None):
     """
     Create a balanced subset of the Food101 dataset according to parameters defined
     in a Hydra configuration. Generates train/val/test splits, saves a class mapping file.
@@ -73,7 +69,6 @@ def create_data(
     test_ratio = cfg.dataset.creation.test_ratio
     select_mode = cfg.dataset.creation.select_mode
     num_classes = cfg.dataset.creation.num_classes
-
 
     # --- Step 2: Prepare dataset path ---
     subset_root = Path(cfg.dataset.path)
