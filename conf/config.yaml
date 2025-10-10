@@ -7,8 +7,8 @@ defaults:
   - outputs: outputs
   - test: test
   - experiments: experiments
-
-
+  - retrain: retrain
+    
 hydra:
   run:
     dir: outputs/${now:%Y-%m-%d_%H-%M-%S}

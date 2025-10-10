@@ -14,6 +14,12 @@ prepare:
 	python -m scripts.save_data
 
 # -----------------------
+# Train with the default config
+# -----------------------
+train:
+	python -m scripts.train
+
+# -----------------------
 # Run experiments
 # -----------------------
 experiments:

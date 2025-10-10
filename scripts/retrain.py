@@ -1,90 +1,124 @@
-# retrain.py
-import datetime
+"""
+Continue training a previously logged MLflow run using Hydra configs.
+
+Usage example:
+---------------
+python -m scripts.continue_train retrain.run_path=mlruns/957336677953857744/5007f95823ef4f8086a506bafdf74444 retrain.epochs_extra=2
+"""
+
 from pathlib import Path
-import sys
+import json
 import torch
 from torch import nn, optim
+
 import hydra
-from omegaconf import DictConfig
+from hydra.utils import get_original_cwd
+import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+from src.utils.model_utils import load_model, get_model_transforms
 from src.data_setup import create_dataloader_from_folder
-from src.models import EfficientNetModel, MobileNetV2Model
 from src.train_engine import train_mlflow
-from src.utils.model_utils import get_model_transforms
 
 
-@hydra.main(version_base=None, config_path="../conf", config_name="config.yaml")
-def main(cfg: DictConfig):
-    # ------------------ RUN INFO ------------------
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    run_name = f"retrain_{timestamp}"
-    cfg.outputs.run_name = run_name
+@hydra.main(version_base=None, config_path="../conf", config_name="config")
+def main(cfg):
+    if not cfg.retrain.run_path:
+        raise ValueError("Debe especificar retrain.run_path")
 
-    retrain_dir = Path.cwd() / "retrained_models" / run_name
-    retrain_dir.mkdir(parents=True, exist_ok=True)
+    run_path = Path(get_original_cwd()) / cfg.retrain.run_path
+    best_info_path = run_path / "artifacts/best_model_info/best_model_info.json"
+    state_dict_path = run_path / "artifacts/model/model_state_dict.pth"
 
-    # ------------------ DATALOADERS -------------
-    train_loader, class_names = create_dataloader_from_folder(
-        data_dir=Path(cfg.dataset.train_dir),
-        batch_size=cfg.train.batch_size,
-        transform=get_model_transforms(
-            model_name=cfg.model.name.lower(),
-            version=cfg.model.version,
-            augmentation=cfg.train.augmentation,
-        ),
-        subset_percentage=cfg.train.subset_percentage,
-        seed=cfg.train.seed,
+    if not best_info_path.exists():
+        raise FileNotFoundError(f"No se encontró el archivo {best_info_path}")
+
+    with open(best_info_path, "r") as f:
+        best_info = json.load(f)
+
+    # Solo sobrescribimos los hyperparameters que ya están definidos en cfg.train
+    for k, v in best_info["hyperparameters"].items():
+        if k in cfg.train:
+            cfg.train[k] = v
+
+    # --- Sobrescribir dinámicamente los valores si están en null ---
+    cfg.retrain.batch_size = cfg.retrain.batch_size or best_info["hyperparameters"].get(
+        "batch_size", 64
     )
-
-    val_loader, _ = create_dataloader_from_folder(
-        data_dir=Path(cfg.dataset.val_dir),
-        batch_size=cfg.train.batch_size,
-        transform=get_model_transforms(
-            model_name=cfg.model.name.lower(),
-            version=cfg.model.version,
-            augmentation=None,
-        ),
-        subset_percentage=1.0,
-        seed=cfg.train.seed,
+    cfg.dataset.train_dir = cfg.retrain.train_dir or best_info.get(
+        "train_dir", "data/dataset/train"
     )
+    cfg.dataset.val_dir = cfg.retrain.val_dir or best_info.get(
+        "val_dir", "data/dataset/val"
+    )
+    cfg.train.epochs = cfg.retrain.epochs_extra or 2
 
-    num_classes = len(class_names)
-
-    # ------------------ MODEL ------------------
-    if cfg.model.name.lower() == "mobilenet":
-        model = MobileNetV2Model(
-            num_classes=num_classes, pretrained=cfg.model.pretrained
-        )
-    else:
-        model = EfficientNetModel(
-            version=cfg.model.version,
-            num_classes=num_classes,
-            pretrained=cfg.model.pretrained,
-        )
-
-    model.freeze_backbone()
-    if cfg.train.unfreeze_layers > 0:
-        model.unfreeze_backbone(cfg.train.unfreeze_layers)
-
-    # ------------------ OPTIMIZER & LOSS ------------------
-    optimizer = optim.Adam(model.model.parameters(), lr=cfg.train.optimizer.lr)
-    if cfg.train.loss_fn.lower() == "crossentropyloss":
-        loss_fn = nn.CrossEntropyLoss()
-    else:
-        raise ValueError(f"Unknown loss function: {cfg.train.loss_fn}")
+    # ---------------- DATA PATHS ----------------
+    train_dir = Path(cfg.dataset.train_dir)
+    val_dir = Path(cfg.dataset.val_dir)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # ------------------ TRAIN ------------------
-    print(f"[INFO] Starting retraining... Results will be saved in {retrain_dir}")
-    train_mlflow(model.model, train_loader, val_loader, optimizer, loss_fn, cfg, device)
+    # --- Data Loaders ---
+    train_transform = get_model_transforms(
+        model_name=best_info["hyperparameters"]["model_name"].lower(),
+        version=best_info["hyperparameters"].get("version"),
+        augmentation=best_info["hyperparameters"].get("augmentation"),
+    )
+    val_transform = get_model_transforms(
+        model_name=best_info["hyperparameters"]["model_name"].lower(),
+        version=best_info["hyperparameters"].get("version"),
+        augmentation=None,
+    )
 
-    # ------------------ SAVE MODEL ------------------
-    model_path = retrain_dir / "model_state_dict.pth"
-    torch.save(model.model.state_dict(), model_path)
-    print(f"[INFO] Retrained model saved at {model_path}")
+    train_loader, class_names = create_dataloader_from_folder(
+        data_dir=Path(get_original_cwd()) / train_dir,
+        batch_size=cfg.retrain.batch_size,
+        transform=train_transform,
+        subset_percentage=best_info["hyperparameters"].get("subset_percentage", 1.0),
+        seed=42,
+    )
+    val_loader, _ = create_dataloader_from_folder(
+        data_dir=Path(get_original_cwd()) / val_dir,
+        batch_size=cfg.retrain.batch_size,
+        transform=val_transform,
+        subset_percentage=1.0,
+        seed=42,
+    )
+    num_classes = len(class_names)
+
+    # --- Load Model ---
+    model = load_model(
+        state_dict_path=state_dict_path,
+        model_name=best_info["hyperparameters"]["model_name"],
+        num_classes=num_classes,
+        version=best_info["hyperparameters"].get("version"),
+        device=device,
+    )
+
+    if model is None:
+        raise RuntimeError("No se pudo cargar el modelo")
+
+    # --- Optimizer & Loss ---
+    optimizer = optim.Adam(
+        model.parameters(), lr=best_info["hyperparameters"].get("optimizer_lr", 1e-3)
+    )
+    loss_fn = nn.CrossEntropyLoss()
+
+    # --- Training ---
+    print(f"[INFO] Continuing training from run {run_path}")
+    train_mlflow(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        loss_fn=loss_fn,
+        cfg=cfg,
+        device=device,
+        continue_training=True,
+        continue_path=run_path,
+    )
 
 
 if __name__ == "__main__":

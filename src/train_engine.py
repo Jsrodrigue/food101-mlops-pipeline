@@ -8,16 +8,16 @@ import torch
 from torch import optim
 from tqdm import tqdm
 
+from .utils.eval_utils import eval_one_epoch
 from .utils.metrics import compute_metrics
 from .utils.mlflow_utils import (
     log_hyperparams_mlflow,
     log_loss_curve_mlflow,
-    update_best_model,
     setup_mlflow,
+    update_best_model,
 )
 from .utils.plot_utils import log_loss_curve
 from .utils.seed_utils import set_seed
-from .utils.eval_utils import eval_one_epoch
 
 
 class EarlyStopping:
@@ -79,12 +79,37 @@ def train_step(model, dataloader, loss_fn, optimizer, device, metrics_list=None)
 
 
 # -------------------- MAIN TRAIN MLflow -------------------- #
-
-
-def train_mlflow(model, train_loader, val_loader, optimizer, loss_fn, cfg, device=None):
+def train_mlflow(
+    model,
+    train_loader,
+    val_loader,
+    optimizer,
+    loss_fn,
+    cfg,
+    device=None,
+    continue_training=False,
+    continue_path=None,
+    prev_metrics=None,
+):
     """
     Train a PyTorch model and log metrics, plots, and best model to MLflow.
+
+    Args:
+        model: PyTorch model.
+        train_loader: DataLoader for training.
+        val_loader: DataLoader for validation.
+        optimizer: PyTorch optimizer.
+        loss_fn: Loss function.
+        cfg: Configuration dictionary or OmegaConf object.
+        device: torch.device, optional.
+        continue_training: bool, whether to resume from previous run.
+        continue_path: Path to previous run, required if continue_training=True.
+        prev_metrics: dict of previous metrics to continue logging.
+
+    Returns:
+        results: dict with training/validation metrics per epoch.
     """
+
     set_seed(cfg.train.seed)
     device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -93,33 +118,71 @@ def train_mlflow(model, train_loader, val_loader, optimizer, loss_fn, cfg, devic
     scheduler = None
     if cfg.train.scheduler.type == "ReduceLROnPlateau":
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="min", patience=cfg.train.scheduler.patience
+            optimizer, mode="min", patience=cfg.train.scheduler.get("patience", 3)
         )
     elif cfg.train.scheduler.type == "StepLR":
         scheduler = optim.lr_scheduler.StepLR(
             optimizer,
-            step_size=cfg.train.scheduler.step_size,
-            gamma=cfg.train.scheduler.gamma,
+            step_size=cfg.train.scheduler.get("step_size", 5),
+            gamma=cfg.train.scheduler.get("gamma", 0.1),
         )
 
     # --- MLflow setup ---
     mlflow_dir, run_name = setup_mlflow(cfg)
-
     early_stopper = EarlyStopping(patience=cfg.train.early_stop_patience, verbose=True)
-    best_model_loss = float("inf")
-    best_model_epoch = -1
 
     # --- Metrics storage ---
-    results = {f"train_{m}": [] for m in cfg.train.metrics + ["loss"]}
-    results.update({f"val_{m}": [] for m in cfg.train.metrics + ["loss"]})
+    if continue_training:
+        results = prev_metrics or {}
+        if not results:
+            json_path = (
+                continue_path / "artifacts" / "metrics" / "training_results.json"
+            )
+            metrics_dir = continue_path / "metrics"
 
+            if json_path.exists():
+                print(f"[INFO] Loading previous training results from {json_path}")
+                with open(json_path, "r") as f:
+                    results = json.load(f)
+            else:
+                print(
+                    "[WARN] No training_results.json found, reconstructing from metrics folder..."
+                )
+                results = {f"train_{m}": [] for m in cfg.train.metrics + ["loss"]}
+                results.update({f"val_{m}": [] for m in cfg.train.metrics + ["loss"]})
+
+                if metrics_dir.exists():
+                    for metric_file in metrics_dir.iterdir():
+                        metric_name = metric_file.name
+                        with open(metric_file, "r") as f:
+                            try:
+                                results[metric_name] = [
+                                    float(line.strip().split()[1])
+                                    for line in f
+                                    if len(line.strip().split()) > 1
+                                ]
+                            except Exception as e:
+                                print(f"[WARN] Could not parse {metric_name}: {e}")
+                num_epochs = len(next(iter(results.values()), []))
+                results["epochs"] = list(range(num_epochs))
+                results["best_epoch"] = num_epochs - 1 if num_epochs > 0 else None
+    else:
+        results = {f"train_{m}": [] for m in cfg.train.metrics + ["loss"]}
+        results.update({f"val_{m}": [] for m in cfg.train.metrics + ["loss"]})
+
+    best_model_epoch = results.get("best_epoch", -1)
+    best_model_loss = (
+        results["val_loss"][best_model_epoch] if best_model_epoch >= 0 else float("inf")
+    )
+
+    # --- Main training loop ---
     with mlflow.start_run(run_name=run_name):
         log_hyperparams_mlflow(cfg, loss_fn)
 
-        for epoch in tqdm(range(cfg.train.epochs), desc="Training"):
-            # --- TRAIN & VALIDATION ---
-
-            # warm classifier first two epochs and the unfreeze if needed
+        start_epoch = len(results["epochs"]) if continue_training else 0
+        for epoch in tqdm(
+            range(start_epoch, start_epoch + cfg.train.epochs), desc="Training"
+        ):
             if epoch == 2 and cfg.train.unfreeze_layers > 0:
                 model.unfreeze_backbone(cfg.train.unfreeze_layers)
 
@@ -130,27 +193,23 @@ def train_mlflow(model, train_loader, val_loader, optimizer, loss_fn, cfg, devic
                 model, val_loader, loss_fn, device, cfg.train.metrics
             )
 
-            # --- Scheduler step ---
             if scheduler:
                 if isinstance(scheduler, optim.lr_scheduler.ReduceLROnPlateau):
                     scheduler.step(val_metrics["loss"])
                 else:
                     scheduler.step()
 
-            # --- Log metrics ---
             for key in train_metrics:
                 mlflow.log_metric(f"train_{key}", train_metrics[key], step=epoch)
                 mlflow.log_metric(f"val_{key}", val_metrics[key], step=epoch)
                 results[f"train_{key}"].append(train_metrics[key])
                 results[f"val_{key}"].append(val_metrics[key])
 
-            # --- Print metrics ---
             train_str = ", ".join([f"{k} {v:.4f}" for k, v in train_metrics.items()])
             val_str = ", ".join([f"{k} {v:.4f}" for k, v in val_metrics.items()])
             print(f"Epoch {epoch+1}: Train: {train_str}")
             print(f"        Val: {val_str}\n")
 
-            # --- Early stopping & best model logging ---
             best_model_loss, is_new_best = update_best_model(
                 model,
                 train_metrics=train_metrics,
@@ -159,7 +218,6 @@ def train_mlflow(model, train_loader, val_loader, optimizer, loss_fn, cfg, devic
                 cfg=cfg,
                 epoch=epoch,
             )
-
             if is_new_best:
                 best_model_epoch = epoch
 
@@ -168,18 +226,15 @@ def train_mlflow(model, train_loader, val_loader, optimizer, loss_fn, cfg, devic
                 print(f"[INFO] Early stopping at epoch {epoch+1}")
                 break
 
-        # --- Add epochs info ---
         results["epochs"] = list(range(len(results["train_loss"])))
         results["best_epoch"] = best_model_epoch
 
-        # --- Save results JSON ---
         json_path = Path("training_results.json")
         with open(json_path, "w") as f:
             json.dump(results, f, indent=4)
         mlflow.log_artifact(str(json_path), artifact_path="metrics")
         json_path.unlink()
 
-        # --- Log loss curve ---
         plot_path = log_loss_curve(results)
         log_loss_curve_mlflow(plot_path, artifact_path="plots")
 

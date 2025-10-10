@@ -1,0 +1,5 @@
+run_path: ""          # path al run que queremos continuar
+epochs_extra: null    # número de epochs adicionales, si está en blanco se usa del run
+batch_size: null      # opcional, si se quiere sobrescribir
+train_dir: null       # opcional, si se quiere sobrescribir
+val_dir: null         # opcional, si se quiere sobrescribir
