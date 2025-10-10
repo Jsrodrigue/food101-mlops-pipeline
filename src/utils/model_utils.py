@@ -39,8 +39,13 @@ def load_model(
             raise FileNotFoundError(f"State dict not found at {state_dict_path}")
         except Exception as e:
             raise RuntimeError(f"Error loading state_dict: {e}")
+        
+        try:
+            model.load_state_dict(state_dict)
+        except RuntimeError:
+        # If fails try load in model.model
+            model.model.load_state_dict(state_dict)
 
-        model.model.load_state_dict(state_dict)
         model.to(device)
         model.eval()
         return model
