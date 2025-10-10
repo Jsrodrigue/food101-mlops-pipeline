@@ -1,0 +1,22 @@
+seed: 42
+batch_size: 64
+epochs: 2
+loss_fn: CrossEntropyLoss
+optimizer: 
+  name: adam
+  lr: 0.001
+unfreeze_layers: 0           # Number of last unfreeze layers
+subset_percentage: 0.3      # Percentage of dataset to use
+augmentation: TrivialAugmentWide
+early_stop_patience: 4
+
+scheduler: 
+  type: None                 # Options: None, ReduceLROnPlateau, StepLR
+  step_size: 5
+  gamma: 0.5
+  patience: 2
+
+metrics: ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
+
+# Paths
+data: ${dataset}   

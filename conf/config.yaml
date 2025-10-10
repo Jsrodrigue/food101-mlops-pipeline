@@ -1,0 +1,14 @@
+defaults:
+  - _self_
+  - train: train
+  - model: mobilenet
+  - select_model: select_model
+  - dataset: dataset
+  - outputs: outputs
+  - test: test
+  - experiments: experiments
+
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d_%H-%M-%S}

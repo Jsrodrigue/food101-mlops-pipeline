@@ -1,0 +1,42 @@
+- name: efficientnet_b0_full
+  model: efficientnet
+  model.version: b0
+  model.pretrained: true
+  train.optimizer.lr: 0.0007
+  train.batch_size: 32
+  train.subset_percentage: 1
+  train.epochs: 5
+  train.augmentation: TrivialAugmentWide
+  train.unfreeze_layers: 2
+
+- name: efficientnet_b2_partial
+  model: efficientnet
+  model.version: b2
+  model.pretrained: true
+  train.optimizer.lr: 0.0007
+  train.batch_size: 32
+  train.subset_percentage: 0.9
+  train.epochs: 5
+  train.augmentation: TrivialAugmentWide
+  train.unfreeze_layers: 3
+
+- name: mobilenet_v1_full
+  model: mobilenet
+  model.version: v2
+  model.pretrained: true
+  train.optimizer.lr: 0.0003
+  train.batch_size: 32
+  train.subset_percentage: 1
+  train.epochs: 5
+  train.augmentation: TrivialAugmentWide
+
+- name: mobilenet_v1_partial
+  model: mobilenet
+  model.version: v2
+  model.pretrained: true
+  train.optimizer.lr: 0.0003
+  train.batch_size: 32
+  train.subset_percentage: 0.9
+  train.epochs: 5
+  train.augmentation: TrivialAugmentWide
+  train.unfreeze_layers: 1

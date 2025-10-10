@@ -1,0 +1,9 @@
+top_k: 3
+metric_name: "accuracy"         # metric to rank by
+metric_source: "val_metrics"    # "train_metrics" or "val_metrics"
+
+# Source directory: where to find runs
+source_runs_dir: ${outputs.local.mlflow.path}
+
+# Target directory: where the selected top-K models will be copied
+target_selected_models_dir: selected_models

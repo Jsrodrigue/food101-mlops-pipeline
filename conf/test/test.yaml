@@ -1,0 +1,7 @@
+runs_dir: "selected_models" 
+batch_size: 32         
+save_results: true      
+device: cpu
+loss_fn: CrossEntropyLoss
+metrics: ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
+save_cm_img: False

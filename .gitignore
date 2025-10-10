@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+
+# Outputs and logs of MLflow
+mlruns/
+mlruns_aws/
+outputs/
+mlflow/
+mlflow_aws/
+
+.gradio
+.env
+.envrc
+.tmp.drivedownload/
+.tmp.driveupload/
+key.pem
+multirun/
+data_s3/
+tmp_experiment/
+
+data/
+selected_models/

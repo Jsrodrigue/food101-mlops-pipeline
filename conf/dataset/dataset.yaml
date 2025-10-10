@@ -1,0 +1,29 @@
+mode: local
+path: data/dataset
+train_dir: data/dataset/train
+val_dir: data/dataset/val
+test_dir: data/dataset/test
+url: ""                      
+overwrite: false
+class_path: data/class_map.json
+
+creation:
+  selected_classes: 
+    - sushi
+    - pizza
+    - steak
+    - hamburger
+    - ramen
+    - tacos
+    - pancakes
+    - lasagna
+    - ice_cream
+    - carrot_cake
+  samples_per_class: 100
+  train_ratio: 0.7
+  val_ratio: 0.1
+  test_ratio: 0.2
+  select_mode: manual # manual, first, random 
+  num_classes: 10
+  seed: 42
+
