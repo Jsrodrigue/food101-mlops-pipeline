@@ -89,7 +89,7 @@ def main(cfg: DictConfig):
 
     # ---------------- TRAIN ----------------
     print("[INFO] Starting training...")
-    train_mlflow(model.model, train_loader, val_loader, optimizer, loss_fn, cfg, device)
+    train_mlflow(model, train_loader, val_loader, optimizer, loss_fn, cfg, device)
 
 
 if __name__ == "__main__":
