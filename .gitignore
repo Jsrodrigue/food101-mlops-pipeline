@@ -4,7 +4,7 @@ __pycache__/
 # Outputs and logs of MLflow
 mlruns/
 mlruns_aws/
-outputs/
+/outputs/
 mlflow/
 mlflow_aws/
 

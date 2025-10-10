@@ -1,0 +1,11 @@
+mode: local
+
+local:
+  path: outputs
+  model_dir: outputs/models
+  mlflow:
+    path: mlruns
+    artifact_dir: artifacts
+    experiment_name: food101_experiment
+
+run_name: ""
