@@ -56,7 +56,7 @@ def train_step(model, dataloader, loss_fn, optimizer, device, metrics_list=None)
     total_loss = 0.0
     all_preds, all_labels = [], []
 
-    for X, y in dataloader:
+    for X, y in tqdm(dataloader):
         X, y = X.to(device), y.to(device)
         y = y.long()
 
