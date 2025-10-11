@@ -56,7 +56,7 @@ def train_step(model, dataloader, loss_fn, optimizer, device, metrics_list=None)
     total_loss = 0.0
     all_preds, all_labels = [], []
 
-    for X, y in tqdm(dataloader):
+    for X, y in dataloader:
         X, y = X.to(device), y.to(device)
         y = y.long()
 
@@ -133,6 +133,7 @@ def train_mlflow(
 
     # --- Metrics storage ---
     if continue_training:
+        model.unfreeze_backbone(cfg.train.unfreeze_layers)
         results = prev_metrics or {}
         if not results:
             json_path = (
@@ -185,10 +186,11 @@ def train_mlflow(
         ):
             if epoch == 2 and cfg.train.unfreeze_layers > 0:
                 model.unfreeze_backbone(cfg.train.unfreeze_layers)
-
+            print("[INFO] Starting train step...")
             train_metrics = train_step(
                 model, train_loader, loss_fn, optimizer, device, cfg.train.metrics
             )
+            print("[INFO] Starting val step...")
             val_metrics = eval_one_epoch(
                 model, val_loader, loss_fn, device, cfg.train.metrics
             )
