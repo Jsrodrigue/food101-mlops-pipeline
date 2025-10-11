@@ -6,20 +6,20 @@ Usage example:
 python -m scripts.continue_train retrain.run_path=mlruns/957336677953857744/5007f95823ef4f8086a506bafdf74444 retrain.epochs_extra=2
 """
 
-from pathlib import Path
 import json
-import torch
-from torch import nn, optim
+import sys
+from pathlib import Path
 
 import hydra
+import torch
 from hydra.utils import get_original_cwd
-import sys
+from torch import nn, optim
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from src.utils.model_utils import load_model, get_model_transforms
 from src.data_setup import create_dataloader_from_folder
 from src.train_engine import train_mlflow
+from src.utils.model_utils import get_model_transforms, load_model
 
 
 @hydra.main(version_base=None, config_path="../conf", config_name="config")
@@ -41,6 +41,9 @@ def main(cfg):
     for k, v in best_info["hyperparameters"].items():
         if k in cfg.train:
             cfg.train[k] = v
+    cfg.model.name = best_info["hyperparameters"]["model_name"]
+    cfg.model.version = best_info["hyperparameters"]["version"]
+    cfg.train.scheduler.type = best_info["hyperparameters"]["scheduler_type"]
 
     # --- Sobrescribir dinámicamente los valores si están en null ---
     cfg.retrain.batch_size = cfg.retrain.batch_size or best_info["hyperparameters"].get(
