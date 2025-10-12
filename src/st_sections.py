@@ -216,7 +216,7 @@ def page_live_prediction(run_names):
             )
 
         # show classes in expandable menu
-        with st.expander("See Classes"):
+        with st.expander("See Classes", expanded=True):
             n = len(class_names)
             mid = (n + 1) // 2
             c1, c2 = st.columns(2)
