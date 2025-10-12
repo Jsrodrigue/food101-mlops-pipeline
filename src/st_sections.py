@@ -255,7 +255,7 @@ def page_metrics_and_config(run_map, run_names):
     class_names = st.session_state.model_classnames[selected_model]
     model_info = st.session_state.model_info[selected_model]
     hyperparameters = model_info["hyperparameters"]
-    hyperparameters["epoch"] = model_info["best_epoch"] + 1
+    hyperparameters["epochs"] = model_info["best_epoch"] + 1
 
     # set run
     run = run_map[selected_model]
@@ -346,7 +346,7 @@ def page_metrics_and_config(run_map, run_names):
 
 
 def page_compare_models(runs):
-    # --- Construir DataFrame con todas las métricas ---
+    # --- Build df with all metrics---
     all_models_data = []
     for run in runs:
         info = run["info"]
