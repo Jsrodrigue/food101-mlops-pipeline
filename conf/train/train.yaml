@@ -5,7 +5,7 @@ loss_fn: CrossEntropyLoss
 optimizer: 
   name: adam
   lr: 0.001
-unfreeze_layers: 0           # Number of last unfreeze layers
+unfreeze_blocks: 0           # Number of last unfreeze blocks
 subset_percentage: 0.3      # Percentage of dataset to use
 augmentation: TrivialAugmentWide
 early_stop_patience: 4

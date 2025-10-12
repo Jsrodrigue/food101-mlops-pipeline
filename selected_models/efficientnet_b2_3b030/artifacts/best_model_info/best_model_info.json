@@ -21,7 +21,7 @@
         "optimizer_lr": 0.001,
         "batch_size": 16,
         "scheduler_type": "ReduceLROnPlateau",
-        "unfreeze_layers": 4,
+        "unfreeze_blocks": 4,
         "augmentation": "TrivialAugmentWide",
         "epochs": 7,
         "subset_percentage": 0.7,

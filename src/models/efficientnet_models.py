@@ -14,13 +14,13 @@ class EfficientNetModel(nn.Module):
 
     Methods:
         forward(x): Returns model predictions for input x.
-        freeze_backbone(): Freeze all layers except the classifier.
-        unfreeze_backbone(layers=None): Unfreeze all or selected layers.
+        freeze_backbone(): Freeze all blocks except the classifier.
+        unfreeze_backbone(blocks=None): Unfreeze all or selected blocks.
 
     Usage example:
         model = EfficientNetModel(version='b0', num_classes=10)
         model.freeze_backbone()
-        model.unfreeze_backbone(layers=3)
+        model.unfreeze_backbone(blocks=3)
     """
 
     def __init__(self, version="b0", num_classes=10, pretrained=True):
@@ -45,35 +45,35 @@ class EfficientNetModel(nn.Module):
         return self.model(x)
 
     def freeze_backbone(self):
-        """Freeze all layers except the classifier."""
+        """Freeze all blocks except the classifier."""
         for name, param in self.model.named_parameters():
             if "classifier" not in name:
                 param.requires_grad = False
 
-    def unfreeze_backbone(self, layers=None):
+    def unfreeze_backbone(self, blocks=None):
         """
-        Unfreeze backbone layers partially or fully.
+        Unfreeze backbone blocks partially or fully.
         Args:
-            layers: None = unfreeze all
-                    int = last N layers
+            blocks: None = unfreeze all
+                    int = last N blocks
                     list = list of block indices to unfreeze
         """
         for name, param in self.model.named_parameters():
             param.requires_grad = False  # Freeze all first
 
-        if layers is None:
+        if blocks is None:
             # Unfreeze all
             for param in self.model.parameters():
                 param.requires_grad = True
         else:
-            # Unfreeze specific layers
-            blocks = list(self.model.features.children())
-            if isinstance(layers, int):
-                blocks_to_unfreeze = blocks[-layers:]
-            elif isinstance(layers, list):
-                blocks_to_unfreeze = [blocks[i] for i in layers]
+            # Unfreeze specific blocks
+            all_blocks = list(self.model.features.children())
+            if isinstance(blocks, int):
+                blocks_to_unfreeze = all_blocks[-blocks:]
+            elif isinstance(blocks, list):
+                blocks_to_unfreeze = [all_blocks[i] for i in blocks]
             else:
-                raise ValueError("layers should be None, int, or list of indices.")
+                raise ValueError("blocks should be None, int, or list of indices.")
 
             for block in blocks_to_unfreeze:
                 for param in block.parameters():

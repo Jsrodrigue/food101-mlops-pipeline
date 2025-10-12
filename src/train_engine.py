@@ -133,7 +133,7 @@ def train_mlflow(
 
     # --- Metrics storage ---
     if continue_training:
-        model.unfreeze_backbone(cfg.train.unfreeze_layers)
+        model.unfreeze_backbone(cfg.train.unfreeze_blocks)
         results = prev_metrics or {}
         if not results:
             json_path = (
@@ -184,8 +184,8 @@ def train_mlflow(
         for epoch in tqdm(
             range(start_epoch, start_epoch + cfg.train.epochs), desc="Training"
         ):
-            if epoch == 2 and cfg.train.unfreeze_layers > 0:
-                model.unfreeze_backbone(cfg.train.unfreeze_layers)
+            if epoch == 2 and cfg.train.unfreeze_blocks > 0:
+                model.unfreeze_backbone(cfg.train.unfreeze_blocks)
             print("[INFO] Starting train step...")
             train_metrics = train_step(
                 model, train_loader, loss_fn, optimizer, device, cfg.train.metrics

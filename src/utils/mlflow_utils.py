@@ -16,10 +16,10 @@ def log_hyperparams_mlflow(cfg, loss_fn):
     mlflow.log_param("optimizer_lr", cfg.train.optimizer.lr)
     mlflow.log_param("scheduler_type", cfg.train.scheduler.type)
     mlflow.log_param("train_subset_percentage", cfg.train.subset_percentage)
-    mlflow.log_param("unfreeze_layers", cfg.train.unfreeze_layers)
+    mlflow.log_param("unfreeze_blocks", cfg.train.unfreeze_blocks)
     mlflow.log_param("version", cfg.model.version)
     mlflow.log_param("epochs", cfg.train.epochs)
-    mlflow.log_param("unfreeze_layers", cfg.train.unfreeze_layers)
+    mlflow.log_param("unfreeze_blocks", cfg.train.unfreeze_blocks)
     mlflow.log_param("loss_fn", type(loss_fn).__name__)
     mlflow.log_param("augmentation", cfg.train.augmentation)
 
@@ -99,7 +99,7 @@ def update_best_model(model, train_metrics, val_metrics, best_loss, cfg, epoch):
                 "optimizer_lr": cfg.train.optimizer.lr,
                 "batch_size": cfg.train.batch_size,
                 "scheduler_type": cfg.train.scheduler.type,
-                "unfreeze_layers": cfg.train.unfreeze_layers,
+                "unfreeze_blocks": cfg.train.unfreeze_blocks,
                 "augmentation": cfg.train.augmentation,
                 "epochs": cfg.train.epochs,
                 "subset_percentage": cfg.train.subset_percentage,

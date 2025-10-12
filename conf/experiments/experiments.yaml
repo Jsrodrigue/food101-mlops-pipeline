@@ -7,7 +7,7 @@
   train.subset_percentage: 1
   train.epochs: 5
   train.augmentation: TrivialAugmentWide
-  train.unfreeze_layers: 2
+  train.unfreeze_blocks: 2
 
 - name: efficientnet_b2_partial
   model: efficientnet
@@ -18,7 +18,7 @@
   train.subset_percentage: 0.9
   train.epochs: 5
   train.augmentation: TrivialAugmentWide
-  train.unfreeze_layers: 3
+  train.unfreeze_blocks: 3
 
 - name: mobilenet_v1_full
   model: mobilenet
@@ -39,4 +39,4 @@
   train.subset_percentage: 0.9
   train.epochs: 5
   train.augmentation: TrivialAugmentWide
-  train.unfreeze_layers: 1
+  train.unfreeze_blocks: 1
