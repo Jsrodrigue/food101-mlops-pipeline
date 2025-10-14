@@ -1,8 +1,11 @@
-# food101
+# Food101
 
 A project for training and evaluating food classification models using **PyTorch**, **MLflow**,  **Hydra** and **Streamlit**.
 
 This project demonstrates a full **MLOps pipeline**: from automated data preparation, training, experiment tracking, and model selection, to testing and deployment of a live demo. All stages are designed to **maximize reproducibility and automation**, allowing you to run experiments, evaluate results, and deploy models with minimal manual intervention.
+
+> This project is inspired by the course [PyTorch for Deep Learning Bootcamp](https://www.udemy.com/course/pytorch-for-deep-learning/) by **Daniel Bourke** and **Andrei Neagoie**.
+
 
 > **Note:** The pipeline is compatible with **any image classification dataset** that follows the same folder structure as `data/dataset/` (i.e., `train/`, `val/`, and `test/` folders, each containing one subfolder per class with images inside). You can replace the Food101 data with your own dataset as long as you keep this structure.
 
@@ -33,9 +36,9 @@ Below are some screenshots of the app in action:
 
 Watch a 10-minute walkthrough of the full pipeline and app usage:
 
-[![Watch the demo](https://img.youtube.com/vi/TU_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=TU_VIDEO_ID_HERE)
+[![Watch the demo](https://img.youtube.com/vi/TU_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
 
-Or click here: [Video Demo on YouTube](https://www.youtube.com/watch?v=TU_VIDEO_ID_HERE)
+Or click here: [Video Demo on YouTube](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
 
 ---
 
@@ -62,7 +65,7 @@ If you just want to try the app with already trained models (no need to run the 
 
 2. **Make sure you have the trained models available locally.**
 
-    The folder`selected_models/` must exist on your machine. We included three trained models that can be used for predictions in the whole Food101 dataset.
+    The folder `selected_models/` must exist on your machine. We included three trained models that can be used for predictions in the whole Food101 dataset.
 
 3. **Launch the demo app:**
 
@@ -105,14 +108,56 @@ make demo
 
 > This makes it much easier to run the full pipeline without typing long commands.
 
-#### **Configuration-driven Workflow**
+---
 
-- **Experiments:**  
-  Defined in `conf/experiments.yaml` (models, hyperparameters, augmentations, etc.).
-- **Model Selection:**  
-  Controlled by `conf/select_models.yaml` (top_k, metric, etc.).
-- **Testing:**  
-  Controlled by `conf/test.yaml` (batch size, device, metrics, etc.).
+### 📑 Configuration-driven Workflow
+
+The pipeline is **highly configurable** via YAML files in the `conf/` folder.  
+You can control every stage of the workflow, including advanced training features:
+
+- **Experiments (`conf/experiments.yaml`):**
+  - **Model selection:** Choose architectures, pretrained weights, and number of classes.
+  - **Train:** Set learning rate, batch size, optimizer, epochs, and more.
+  - **Schedulers:**  
+    Use learning rate schedulers (`StepLR` and `ReduceLROnPlateau`) by specifying the scheduler type and its parameters.  
+    Example:
+    ```yaml
+    train:
+      scheduler: 
+        type: ReduceLROnPlateau            # Options: None, ReduceLROnPlateau, StepLR
+        step_size: 5
+        gamma: 0.5
+        patience: 2
+    ```
+  - **Early stopping:**  
+    Enable early stopping to halt training when validation performance stops improving.  
+    Example:
+    ```yaml
+    train:
+      early_stop_patience: 4
+    ```
+  - **Checkpointing:**  
+    Automatically saves the best model (based on loss) during training.  
+
+  - **Reproducibility:** Set random seeds for deterministic results.
+
+- **Model Selection (`conf/select_models.yaml`):**
+  - Choose how many top models to keep (`top_k`).
+  - Select the metric for ranking models (e.g., accuracy, F1, etc.).
+  - Define source and destination folders for selected models.
+
+- **Testing (`conf/test.yaml`):**
+  - Set batch size, device (`cpu` or `cuda`), and which metrics to compute.
+  Example  
+  ```yaml
+  runs_dir: "selected_models" 
+  batch_size: 32         
+  save_results: true      
+  device: cuda
+  loss_fn: CrossEntropyLoss
+  metrics: ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
+  save_cm_img: False
+  ```
 
 All results and artifacts are tracked with MLflow (`mlruns/`).
 
