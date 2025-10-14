@@ -36,9 +36,10 @@ Below are some screenshots of the app in action:
 
 Watch a 10-minute walkthrough of the full pipeline and app usage:
 
-[![Watch the demo](https://img.youtube.com/vi/TU_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
+[![Watch the demo](https://img.youtube.com/vi/MXsRl4Iy6AA/0.jpg)](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
 
 Or click here: [Video Demo on YouTube](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
+
 
 ---
 
