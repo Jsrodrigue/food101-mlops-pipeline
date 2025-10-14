@@ -35,7 +35,7 @@ You can use this project in **two ways**:
 
 ---
 
-### 1. Run Only the Demo App
+### Option 1: Run Only the Demo App
 
 If you just want to try the app with already trained models (no need to run the full pipeline):
 
@@ -50,10 +50,9 @@ If you just want to try the app with already trained models (no need to run the 
     pip install -r requirements.txt
     ```
 
-2. **Make sure you have the dataset and trained models available locally.**
+2. **Make sure you have the trained models available locally.**
 
-    The folders `data/dataset/` and `selected_models/` must exist on your machine.  
-    If you have not run the pipeline, you need to prepare the dataset and train the models first.
+    The folder`selected_models/` must exist on your machine. We included three trained models that can be used for predictions in the whole Food101 dataset.
 
 3. **Launch the demo app:**
 
@@ -67,7 +66,7 @@ If you just want to try the app with already trained models (no need to run the 
 
 ---
 
-### 2. Full MLOps Pipeline (Reproducible Training & Evaluation)
+### 2. Option 2: Full MLOps Pipeline (Reproducible Training & Evaluation)
 
 Run the entire pipeline from data preparation to model selection and testing using the provided `makefile` commands.
 
