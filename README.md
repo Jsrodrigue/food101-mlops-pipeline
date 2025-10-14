@@ -1,38 +1,50 @@
-# food101Mini
+# food101
 
-A project for training and evaluating food classification models using **PyTorch**, **MLflow**, and **Hydra**.  
+A project for training and evaluating food classification models using **PyTorch**, **MLflow**, and **Hydra**.
 
-This project demonstrates a full **MLOps pipeline**: from automated data preparation, training, experiment tracking, and model selection, to testing and deployment of a live demo. All stages are designed to **maximize reproducibility and automation**, allowing you to run experiments, evaluate results, and deploy models with minimal manual intervention.  
+This project demonstrates a full **MLOps pipeline**: from automated data preparation, training, experiment tracking, and model selection, to testing and deployment of a live demo. All stages are designed to **maximize reproducibility and automation**, allowing you to run experiments, evaluate results, and deploy models with minimal manual intervention.
 
-By leveraging Hydra for configuration management, MLflow for experiment tracking, and modular scripts, this project allows you to:  
-
-- Run multiple experiments with different models, hyperparameters, and augmentations automatically.  
-- Track and compare model performance metrics without manually editing scripts.  
-- Select top-performing models based on any evaluation metric in an automated way.  
-- Test selected models and generate structured evaluation reports.  
-- Deploy a demo app for inference on new images, demonstrating the complete workflow.
-
+> **Note:** The pipeline is compatible with **any image classification dataset** that follows the same folder structure as `data/dataset/` (i.e., `train/`, `val/`, and `test/` folders, each containing one subfolder per class with images inside). You can replace the Food101 data with your own dataset as long as you keep this structure.
 
 ---
 
-## How to Run the Project
 
-You can use the provided `makefile` to simplify running the main steps of the project.  
-Here are the available commands:
+## 🖼️ App Screenshots
 
-## Quick Overview of Commands
+Below are some screenshots of the app in action:
 
-| Command        | What it does (summary)                                                |
-|----------------|---------------------------------------------                          |
-| `make prepare` | Prepare dataset: download, extract, split into train/val/test.        |
-| `make experiments` | Run all configured experiments and log results to MLflow.         |
-| `make select`  | Pick top-K models based on a metric like accuracy or F1.              |
-| `make test`    | Evaluate the selected models on the test set and save metrics.        |
-| `make demo`    | Launch Streamlit demo (optional, if installed).                       |
-| `make clean`   | Remove outputs, selected models, and MLflow logs.                     |
-| `make ui`      | Open MLflow UI to explore experiments.                                |
-| `make help`    | Show all available commands.                                          |
-| `make run`     | Run the full pipeline: prepare → experiments → select → test → demo.  | 
+![Home Page](images/screenshot_home.png)
+![Live Prediction](images/screenshot_predict.png)
+![Metrics Page](images/screenshot_metrics.png)
+
+---
+
+## 🎬 Video Demo
+
+Watch a 10-minute walkthrough of the full pipeline and app usage:
+
+[![Watch the demo](https://img.youtube.com/vi/TU_VIDEO_ID_HERE
+
+## 🚀 How to Use
+
+You can use this project in **two ways**:
+
+### 1. Full MLOps Pipeline (Reproducible Training & Evaluation)
+
+Run the entire pipeline from data preparation to model selection and testing using the provided `makefile` commands.
+
+#### **Step-by-step Pipeline**
+
+| Command              | Description                          |
+|----------------------|--------------------------------------|
+| `make prepare`       | Prepare the dataset                  |
+| `make experiments`   | Run all experiments                  |
+| `make select`        | Select top models                    |
+| `make test`          | Test selected models                 |
+| `make demo`          | Launch Streamlit demo (if available) |
+| `make clean`         | Remove outputs and logs              |
+| `make ui`            | Launch MLflow UI                     |
+| `make help`          | Show all available commands          |
 
 **Example usage:**
 
@@ -46,144 +58,80 @@ make demo
 
 > This makes it much easier to run the full pipeline without typing long commands.
 
----
+#### **Configuration-driven Workflow**
 
-### 1. Clone the Repository
+- **Experiments:**  
+  Defined in `conf/experiments.yaml` (models, hyperparameters, augmentations, etc.).
+- **Model Selection:**  
+  Controlled by `conf/select_models.yaml` (top_k, metric, etc.).
+- **Testing:**  
+  Controlled by `conf/test.yaml` (batch size, device, metrics, etc.).
 
-```bash
-git clone https://github.com/tu_usuario/food101Mini.git
-cd food101Mini
-```
+All results and artifacts are tracked with MLflow (`mlruns/`).
 
 ---
 
 ### 2. Install Dependencies
 
-It is recommended to use a virtual environment:
+It is strongly recommended to use a **conda environment** to keep your dependencies isolated and avoid compilation issues.
 
-#### On Windows
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
+conda create -n food101 python=3.12
+conda activate food101
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-#### On macOS/Linux
+> If you ever want to deactivate the environment, just run `conda deactivate`.
 
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+## 📂 Project Structure
 
----
-
-### 3. Data Preparation
-
-You can create a custom subset of Food101 using the `create_data` function in `data_engine.py`.  
-
-This function allows you to:
-
-- **Select classes manually** by specifying a list in the config (`selected_classes`).  
-- **Select a random subset of classes** by specifying the number of classes and using `select_mode: "random"`.  
-- **Select the first N classes alphabetically** with `select_mode: "first"` and `num_classes`.  
-
-The script will automatically:
-
-- Download and verify the Food101 dataset if not present or if the zip is corrupt.  
-- Create balanced train/val/test splits for the selected classes.  
-- Save a class mapping file (`class_map.json`) for reproducibility.  
-
-> **Note:** If you only want to use the included dataset under `data/dataset`, you do **not** need to run this step.
-
----
-
-### 4. Run Experiments
-
-To train and evaluate your models as defined in your configuration, run:
-
-```bash
-make experiments
-```
-
-This will execute all experiments specified in your configuration files and log results to MLflow.
-
----
-
-### 5. Select Top Models
-
-After running experiments, select the top-performing models based on your chosen metric:
-
-```bash
-make select
-```
-
-- Configure selection in `conf/select_models.yaml`.
-
-Example configuration:
-
-```yaml
-top_k: 3
-metric_name: "accuracy"  # Options: "accuracy", "f1_macro", etc.
-source_runs_dir: mlruns
-target_selected_models_dir: selected_models
-```
-
----
-
-### 6. Test Selected Models
-
-To evaluate the selected top models on the test set, run:
-
-```bash
-make test
-```
-
-- Configure testing in `conf/test.yaml`.
-
-Example configuration:
-
-```yaml
-runs_dir: "selected_models"
-batch_size: 32
-save_results: true
-device: cpu
-loss_fn: CrossEntropyLoss
-metrics: ["accuracy", "precision_macro", "recall_macro", "f1_macro"]
-```
-
----
-
-### 7. Project Structure
+Below is the recommended folder structure for this project.  
+**Note:** The `data/dataset/` folder (and its subfolders) will not appear until you prepare or generate your dataset locally, since data is not included in the repository.
 
 ```
-food101Mini/
+food101/
 ├── conf/                # Hydra configuration files
-├── data/                # Training, validation, and test datasets
+│   ├── experiments.yaml
+│   ├── select_models.yaml
+│   ├── test.yaml
+│   └── ... 
+├── data/                # Data folder (not versioned, created locally)
 │   └── dataset/
 │       ├── train/
 │       ├── val/
 │       └── test/
-├── scripts/             # Execution scripts
+├── mlruns/              # MLflow logs and artifacts (not versioned)
+├── outputs/             # Experiment outputs (not versioned)
+├── selected_models/     # Selected/best models (not versioned)
+├── scripts/             # Pipeline and utility scripts
 │   ├── save_data.py
 │   ├── run_experiments.py
 │   ├── select_models.py
 │   ├── train.py
-│   └── test.py
-├── src/                 # Project source code
-│   ├── models/          # Model definitions
-│   └── utils/           # Utility functions
-├── outputs/             # Experiment outputs
-├── selected_models/     # Top-K selected models
-└── mlruns/              # MLflow logs
+│   ├── test.py
+│   └── orchestrator.py
+├── src/                 # Source code
+│   ├── models/
+│   ├── utils/
+│   ├── predictions.py
+│   └── st_sections.py
+├── app.py               # Streamlit or Gradio app
+├── requirements.txt
+├── makefile
+├── README.md
+└── .gitignore
 ```
+
+> **Note:**  
+> Folders like `data/dataset/`, `mlruns/`, `outputs/`, and `selected_models/` are **not included** in the repository and will be created automatically as you run the pipeline.
 
 ---
 
-### 8. How Configuration Files Drive the Pipeline
+## ⚙️ Configuration Files
 
-Each main step of the pipeline uses YAML configuration files in the `conf/` folder.  
+Each main step of the pipeline uses YAML configuration files in the `conf/` folder:
 
 - **Experiments (`make experiments`):**  
   Uses `conf/experiments.yaml` to define models, hyperparameters, augmentations, number of epochs, etc. The script automatically launches all experiments and logs results to MLflow.
@@ -194,12 +142,11 @@ Each main step of the pipeline uses YAML configuration files in the `conf/` fold
 - **Test Selected Models (`make test`):**  
   Reads configuration from `conf/test.yaml` for batch size, device (`cpu` or `cuda`), metrics, and saving options.
 
-**Why is this useful?**  
-It separates code logic from experimental parameters, making workflows reproducible, easier to compare, and collaborative.
+This approach separates code logic from experimental parameters, making workflows reproducible, easier to compare, and collaborative.
 
 ---
 
-### 9. Cleaning Outputs
+## 🧹 Cleaning Outputs
 
 To remove all outputs, selected models, and MLflow logs:
 
@@ -211,10 +158,56 @@ This safely deletes `outputs/`, `selected_models/`, and `mlruns/` if they exist.
 
 ---
 
-### 10. Additional Recommendations
+## 💡 Additional Recommendations
 
-- Optional: Launch MLflow UI with `make ui` for experiment tracking and exploring all the runs.  
-- Deploy or test the demo app with `make demo`.  
+- Launch MLflow UI with `make ui` for experiment tracking and exploring all the runs.
 - Run `make help` for all available commands.
+- Add a video demo or screenshots to further enhance your portfolio!
 
 ---
+
+### ⚠️ Important Note for Full Pipeline
+
+If you want to run the **full pipeline** (starting from data preparation with `make prepare`), make sure to **delete the `selected_models/` folder** after cloning the repository.  
+This is important because if `selected_models/` exists from a previous run (possibly with different classes), it may cause errors or inconsistencies when preparing a new dataset with different classes.
+
+You can safely remove it with:
+
+```bash
+rm -rf selected_models
+```
+
+or on Windows:
+```cmd
+rmdir /s /q selected_models
+```
+
+Then proceed with the pipeline as usual:
+
+```bash
+make prepare
+make experiments
+make select
+make test
+make demo
+```
+
+### ⚡️ Orchestrate the Full Pipeline with a Single Command
+
+You can also run the **entire pipeline automatically** using the provided `orchestrator` script.  
+This script will execute all the main steps (prepare, experiments, select, test, etc.) in the correct order.
+
+Simply run:
+
+```bash
+make run
+```
+or
+```bash
+python -m scripts.orchestrator
+```
+
+This is especially useful for reproducibility, automation, or when running the pipeline on a new dataset from scratch.
+
+---
+
