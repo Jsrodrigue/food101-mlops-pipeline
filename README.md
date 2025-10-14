@@ -6,12 +6,28 @@ This project demonstrates a full **MLOps pipeline**: from automated data prepara
 
 > This project is inspired by the course [PyTorch for Deep Learning Bootcamp](https://www.udemy.com/course/pytorch-for-deep-learning/) by **Daniel Bourke** and **Andrei Neagoie**.
 
-
 > **Note:** The pipeline is compatible with **any image classification dataset** that follows the same folder structure as `data/dataset/` (i.e., `train/`, `val/`, and `test/` folders, each containing one subfolder per class with images inside). You can replace the Food101 data with your own dataset as long as you keep this structure.
 
 ---
+
+## 🧠 Supported Model Architectures
+
+This project supports the following model architectures out of the box:
+
+- **EfficientNet B0 & B2:**  
+  EfficientNet models are known for their excellent balance between accuracy and efficiency, using a compound scaling method to optimize depth, width, and resolution.  
+  - *B0* is the baseline model, lightweight and fast.
+  - *B2* is slightly larger, offering improved accuracy at a modest computational cost.
+
+- **MobileNet V2:**  
+  MobileNetV2 is a lightweight model designed for mobile and embedded vision applications. It uses depthwise separable convolutions and inverted residuals to achieve high efficiency with good accuracy.
+
+You can easily add more architectures by extending the model loading logic in the codebase. The modular design allows for quick integration of any PyTorch-compatible model.
+
+---
+
 ## 💻 Check Out the Live App
-  Click [here](https://food101-mlops-pipeline-kz9xtkxx4n7mdggvdrebbc.streamlit.app/#live-prediction) to see the app in action.
+Click [here](https://food101-mlops-pipeline-kz9xtkxx4n7mdggvdrebbc.streamlit.app/#live-prediction) to see the app in action.
 
 ## 🖼️ App Screenshots
 
@@ -29,7 +45,6 @@ Below are some screenshots of the app in action:
   <img src="images/compare.png" alt="Compare Page" width="400" height="250" style="margin: 10px;">
 </p>
 
-
 ---
 
 ## 🎬 Video Demo
@@ -39,7 +54,6 @@ Watch a 10-minute walkthrough of the full pipeline and app usage:
 [![Watch the demo](https://img.youtube.com/vi/MXsRl4Iy6AA/0.jpg)](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
 
 Or click here: [Video Demo on YouTube](https://www.youtube.com/watch?v=MXsRl4Iy6AA)
-
 
 ---
 
@@ -253,7 +267,6 @@ food101/
 > Folders like `data/dataset/`, `mlruns/`, `outputs/`, and `selected_models/` are **not included** in the repository and will be created automatically as you run the pipeline.
 
 ---
-
 
 ## 💡 Additional Recommendations
 
