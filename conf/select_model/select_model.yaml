@@ -1,4 +1,4 @@
-top_k: 3
+top_k: 2
 metric_name: "accuracy"         # metric to rank by
 metric_source: "val_metrics"    # "train_metrics" or "val_metrics"
 

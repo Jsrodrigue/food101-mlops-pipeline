@@ -1,11 +1,11 @@
 import torch
 from torchvision import transforms
-from torchvision.transforms import TrivialAugmentWide
 from torchvision.models import (
     EfficientNet_B0_Weights,
     EfficientNet_B2_Weights,
     MobileNet_V2_Weights,
 )
+from torchvision.transforms import TrivialAugmentWide
 
 from src.models import EfficientNetModel, MobileNetV2Model
 
@@ -83,6 +83,8 @@ def get_model_transforms(
         if augmentation:
             if augmentation.lower() == "trivialaugmentwide":
                 transform = transforms.Compose([TrivialAugmentWide(), transform])
+            elif augmentation.lower() == "none":
+                pass
             else:
                 raise ValueError(f"Unknown augmentation {augmentation}")
 
