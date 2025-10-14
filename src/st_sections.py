@@ -13,7 +13,7 @@ from src.utils.render_utils import (
     render_confusion_matrix,
 )
 import numpy as np
-
+import time
 
 # ----------------------------------------
 #                 SIDE BAR
@@ -193,6 +193,7 @@ def page_live_prediction(run_names):
         if st.button(
             "🔮 Predict", type="primary", disabled=predict_disabled, width="stretch"
         ):
+            start_time = time.time()
             result = predict_image(
                 image_input=st.session_state.uploaded_image,
                 model=model,
@@ -200,6 +201,8 @@ def page_live_prediction(run_names):
                 class_names=class_names,
                 device="cuda" if cuda.is_available() else "cpu",
             )
+            inference_time = time.time() - start_time  # en segundos
+            result["inference_time"] = inference_time
             st.session_state.prediction_result = result
 
         # Results below button
@@ -210,6 +213,7 @@ def page_live_prediction(run_names):
                 result["pred_prob"],
                 model_name=model_name,
                 test_acc=test_acc,
+                inference_time=result["inference_time"],
             )
             render_probability_bars(
                 class_names, result["probabilities"][0], threshold=0.1
@@ -256,6 +260,8 @@ def page_metrics_and_config(run_map, run_names):
     model_info = st.session_state.model_info[selected_model]
     hyperparameters = model_info["hyperparameters"]
     hyperparameters["epochs"] = model_info["best_epoch"] + 1
+    hyperparameters["num_params"] = f"{st.session_state.num_params[selected_model] / 1e6:.2f}M"
+    hyperparameters["size"] = f"{st.session_state.size[selected_model]:.2f} MB"
 
     # set run
     run = run_map[selected_model]

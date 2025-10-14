@@ -1,7 +1,7 @@
 import streamlit as st
 import torch
 from src.utils.model_utils import load_model, get_model_transforms
-
+import os
 
 def load_selected_model(run):
     model_info = run["info"]
@@ -37,6 +37,9 @@ def initialize_models(run_map):
         st.session_state.model_classnames = {}
         st.session_state.model_name = {}
         st.session_state.model_info = {}  # metrics, hyperparams, etc.
+        st.session_state.num_params = {}
+        st.session_state.size = {}
+        st.session_state.state_dict_path={}
 
         # Seleccionar primer modelo por defecto
         st.session_state.selected_display = list(run_map.keys())[0]
@@ -48,6 +51,12 @@ def initialize_models(run_map):
             st.session_state.model_classnames[name] = class_names
             st.session_state.model_name[name] = name
             st.session_state.model_info[name] = run["info"]
+            st.session_state.num_params[name] = sum(p.numel() for p in model.parameters())
+            st.session_state.state_dict_path[name] = run["state_dict"]
+            st.session_state.size[name] = os.path.getsize(run["state_dict"]) / 1024**2
+
+
+            
 
 
 def get_selected_model_info():

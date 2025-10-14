@@ -5,7 +5,7 @@
   train.optimizer.lr: 0.0007
   train.batch_size: 32
   train.subset_percentage: 1
-  train.epochs: 5
+  train.epochs: 3
   train.augmentation: TrivialAugmentWide
   train.unfreeze_blocks: 2
 
@@ -16,8 +16,8 @@
   train.optimizer.lr: 0.0007
   train.batch_size: 32
   train.subset_percentage: 0.9
-  train.epochs: 5
-  train.augmentation: TrivialAugmentWide
+  train.epochs: 3
+  train.augmentation: None
   train.unfreeze_blocks: 3
 
 - name: mobilenet_v1_full
@@ -27,16 +27,5 @@
   train.optimizer.lr: 0.0003
   train.batch_size: 32
   train.subset_percentage: 1
-  train.epochs: 5
+  train.epochs: 3
   train.augmentation: TrivialAugmentWide
-
-- name: mobilenet_v1_partial
-  model: mobilenet
-  model.version: v2
-  model.pretrained: true
-  train.optimizer.lr: 0.0003
-  train.batch_size: 32
-  train.subset_percentage: 0.9
-  train.epochs: 5
-  train.augmentation: TrivialAugmentWide
-  train.unfreeze_blocks: 1

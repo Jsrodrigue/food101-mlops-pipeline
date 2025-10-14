@@ -5,7 +5,12 @@ import streamlit as st
 
 
 def render_prediction_card(
-    pred_class: str, pred_prob: float, model_name: str = None, test_acc: float = None
+    pred_class: str, 
+    pred_prob: float, 
+    model_name: str = None, 
+    test_acc: float = None,
+    inference_time: float = None
+
 ):
     """Show the prediction with optional model info below."""
 
@@ -14,6 +19,16 @@ def render_prediction_card(
         model_info_html += f'<p style="font-size:14px; color:#555; margin:5px 0 0 0;">Model Name: <b>{model_name}</b></p>'
     if test_acc is not None:
         model_info_html += f'<p style="font-size:14px; color:#555; margin:0;">Model Test Accuracy: <b>{test_acc:.2f}%</b></p>'
+    
+    #Number of params
+    num_params = st.session_state.num_params[model_name]
+    num_params_millions = num_params / 1e6
+    model_info_html += f'<p style="font-size:14px; color:#555; margin:0;">Num of Parameters: <b>{num_params_millions:.2f}M</b></p>'
+
+    # inference time
+    if inference_time is not None:
+        model_info_html += f'<p style="font-size:14px; color:#555; margin:0;">Inference Time: <b>{inference_time*1000:.2f} ms</b></p>'
+
 
     st.markdown(
         f"""
