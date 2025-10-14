@@ -23,13 +23,51 @@ Below are some screenshots of the app in action:
 
 Watch a 10-minute walkthrough of the full pipeline and app usage:
 
-[![Watch the demo](https://img.youtube.com/vi/TU_VIDEO_ID_HERE
+[![Watch the demo](https://img.youtube.com/vi/TU_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=TU_VIDEO_ID_HERE)
+
+Or click here: [Video Demo on YouTube](https://www.youtube.com/watch?v=TU_VIDEO_ID_HERE)
+
+---
 
 ## 🚀 How to Use
 
 You can use this project in **two ways**:
 
-### 1. Full MLOps Pipeline (Reproducible Training & Evaluation)
+---
+
+### 1. Run Only the Demo App
+
+If you just want to try the app with already trained models (no need to run the full pipeline):
+
+1. **Clone the repository and install dependencies:**
+
+    ```bash
+    git clone https://github.com/tu_usuario/food101Mini.git
+    cd food101Mini
+    conda create -n food101 python=3.10
+    conda activate food101
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    ```
+
+2. **Make sure you have the dataset and trained models available locally.**
+
+    The folders `data/dataset/` and `selected_models/` must exist on your machine.  
+    If you have not run the pipeline, you need to prepare the dataset and train the models first.
+
+3. **Launch the demo app:**
+
+    ```bash
+    make demo
+    ```
+    or
+    ```bash
+    streamlit run app.py
+    ```
+
+---
+
+### 2. Full MLOps Pipeline (Reproducible Training & Evaluation)
 
 Run the entire pipeline from data preparation to model selection and testing using the provided `makefile` commands.
 
@@ -71,19 +109,51 @@ All results and artifacts are tracked with MLflow (`mlruns/`).
 
 ---
 
-### 2. Install Dependencies
+### ⚠️ Important Note for Full Pipeline
 
-It is strongly recommended to use a **conda environment** to keep your dependencies isolated and avoid compilation issues.
+If you want to run the **full pipeline** (starting from data preparation with `make prepare`), make sure to **delete the `selected_models/` folder** after cloning the repository.  
+This is important because if `selected_models/` exists from a previous run (possibly with different classes), it may cause errors or inconsistencies when preparing a new dataset with different classes.
 
+You can safely remove it with:
 
 ```bash
-conda create -n food101 python=3.12
-conda activate food101
-pip install --upgrade pip
-pip install -r requirements.txt
+rm -rf selected_models
+```
+or on Windows:
+```cmd
+rmdir /s /q selected_models
 ```
 
-> If you ever want to deactivate the environment, just run `conda deactivate`.
+Then proceed with the pipeline as usual:
+
+```bash
+make prepare
+make experiments
+make select
+make test
+make demo
+```
+
+---
+
+### ⚡️ Orchestrate the Full Pipeline with a Single Command
+
+You can also run the **entire pipeline automatically** using the provided `orchestrator` script.  
+This script will execute all the main steps (prepare, experiments, select, test, etc.) in the correct order.
+
+Simply run:
+
+```bash
+make run
+```
+or
+```bash
+python -m scripts.orchestrator
+```
+
+This is especially useful for reproducibility, automation, or when running the pipeline on a new dataset from scratch.
+
+---
 
 ## 📂 Project Structure
 
@@ -163,51 +233,6 @@ This safely deletes `outputs/`, `selected_models/`, and `mlruns/` if they exist.
 - Launch MLflow UI with `make ui` for experiment tracking and exploring all the runs.
 - Run `make help` for all available commands.
 - Add a video demo or screenshots to further enhance your portfolio!
-
----
-
-### ⚠️ Important Note for Full Pipeline
-
-If you want to run the **full pipeline** (starting from data preparation with `make prepare`), make sure to **delete the `selected_models/` folder** after cloning the repository.  
-This is important because if `selected_models/` exists from a previous run (possibly with different classes), it may cause errors or inconsistencies when preparing a new dataset with different classes.
-
-You can safely remove it with:
-
-```bash
-rm -rf selected_models
-```
-
-or on Windows:
-```cmd
-rmdir /s /q selected_models
-```
-
-Then proceed with the pipeline as usual:
-
-```bash
-make prepare
-make experiments
-make select
-make test
-make demo
-```
-
-### ⚡️ Orchestrate the Full Pipeline with a Single Command
-
-You can also run the **entire pipeline automatically** using the provided `orchestrator` script.  
-This script will execute all the main steps (prepare, experiments, select, test, etc.) in the correct order.
-
-Simply run:
-
-```bash
-make run
-```
-or
-```bash
-python -m scripts.orchestrator
-```
-
-This is especially useful for reproducibility, automation, or when running the pipeline on a new dataset from scratch.
 
 ---
 
