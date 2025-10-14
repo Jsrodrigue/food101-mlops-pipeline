@@ -96,7 +96,7 @@ If you just want to try the app with already trained models (no need to run the 
 
 ### Option 2: Full MLOps Pipeline (Reproducible Training & Evaluation)
 
-Run the entire pipeline from data preparation to model selection and testing using the provided `makefile` commands.
+Run the entire pipeline from data preparation to model selection and testing using the provided `makefile` commands. Before runing the pipeline make sure to customize the configurations in the `conf` folder. 
 
 #### **Step-by-step Pipeline**
 
@@ -243,7 +243,7 @@ food101/
 │       └── test/
 ├── mlruns/              # MLflow logs and artifacts (not versioned)
 ├── outputs/             # Experiment outputs (not versioned)
-├── selected_models/     # Selected/best models (not versioned)
+├── selected_models/     # Selected/best models
 ├── scripts/             # Pipeline and utility scripts
 │   ├── save_data.py
 │   ├── run_experiments.py
