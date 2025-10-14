@@ -1,21 +1,31 @@
 # food101
 
-A project for training and evaluating food classification models using **PyTorch**, **MLflow**, and **Hydra**.
+A project for training and evaluating food classification models using **PyTorch**, **MLflow**,  **Hydra** and **Streamlit**.
 
 This project demonstrates a full **MLOps pipeline**: from automated data preparation, training, experiment tracking, and model selection, to testing and deployment of a live demo. All stages are designed to **maximize reproducibility and automation**, allowing you to run experiments, evaluate results, and deploy models with minimal manual intervention.
 
 > **Note:** The pipeline is compatible with **any image classification dataset** that follows the same folder structure as `data/dataset/` (i.e., `train/`, `val/`, and `test/` folders, each containing one subfolder per class with images inside). You can replace the Food101 data with your own dataset as long as you keep this structure.
 
 ---
-
+## 💻 Check Out the Live App
+  Click [here](https://food101-mlops-pipeline-kz9xtkxx4n7mdggvdrebbc.streamlit.app/#live-prediction) to see the app in action.
 
 ## 🖼️ App Screenshots
 
 Below are some screenshots of the app in action:
 
-![Home Page](images/screenshot_home.png)
-![Live Prediction](images/screenshot_predict.png)
-![Metrics Page](images/screenshot_metrics.png)
+<h3 align="center">📸 App Screenshots</h3>
+
+<p align="center">
+  <img src="images/home.png" alt="Home Page" width="400" height="250" style="margin: 10px;">
+  <img src="images/prediction.png" alt="Live Prediction" width="400" height="250" style="margin: 10px;">
+</p>
+
+<p align="center">
+  <img src="images/cm.png" alt="Metrics Page" width="400" height="250" style="margin: 10px;">
+  <img src="images/compare.png" alt="Compare Page" width="400" height="250" style="margin: 10px;">
+</p>
+
 
 ---
 
@@ -66,7 +76,7 @@ If you just want to try the app with already trained models (no need to run the 
 
 ---
 
-### 2. Option 2: Full MLOps Pipeline (Reproducible Training & Evaluation)
+### Option 2: Full MLOps Pipeline (Reproducible Training & Evaluation)
 
 Run the entire pipeline from data preparation to model selection and testing using the provided `makefile` commands.
 
@@ -198,34 +208,6 @@ food101/
 
 ---
 
-## ⚙️ Configuration Files
-
-Each main step of the pipeline uses YAML configuration files in the `conf/` folder:
-
-- **Experiments (`make experiments`):**  
-  Uses `conf/experiments.yaml` to define models, hyperparameters, augmentations, number of epochs, etc. The script automatically launches all experiments and logs results to MLflow.
-
-- **Select Top Models (`make select`):**  
-  Uses `conf/select_models.yaml` to define `top_k`, metric name, MLflow runs directory, and target folder for copying the best models.
-
-- **Test Selected Models (`make test`):**  
-  Reads configuration from `conf/test.yaml` for batch size, device (`cpu` or `cuda`), metrics, and saving options.
-
-This approach separates code logic from experimental parameters, making workflows reproducible, easier to compare, and collaborative.
-
----
-
-## 🧹 Cleaning Outputs
-
-To remove all outputs, selected models, and MLflow logs:
-
-```bash
-make clean
-```
-
-This safely deletes `outputs/`, `selected_models/`, and `mlruns/` if they exist.
-
----
 
 ## 💡 Additional Recommendations
 
